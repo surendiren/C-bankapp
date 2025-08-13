@@ -1,1 +1,202 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+FILE *fptr;
+
+struct member {
+    char name[50];
+    int day;
+    int month;
+    int year;
+    char gender[20];
+    long long int accountnumber, phonenumber;
+    char username[30];
+    char password[30];
+    float balance;
+};
+
+struct member *members[100];
+int count = 0;
+
+void registration() {
+    struct member *newmember = (struct member *)malloc(sizeof(struct member));
+
+    printf("Enter Your Name: ");
+    scanf("%s", newmember->name);
+    fprintf(fptr, "Name:%s\n", newmember->name);
+
+    printf("Enter Your Birth Day: ");
+    scanf("%d", &newmember->day);
+    printf("Enter Your Birth Month: ");
+    scanf("%d", &newmember->month);
+    printf("Enter Your Year: ");
+    scanf("%d", &newmember->year);
+    fprintf(fptr, "DOB:%d/%d/%d\n", newmember->day, newmember->month, newmember->year);
+
+    printf("Enter Your Gender: ");
+    scanf("%s", newmember->gender);
+    fprintf(fptr, "Gender:%s\n", newmember->gender);
+
+    printf("Enter Your Account Number: ");
+    scanf("%lld", &newmember->accountnumber);
+    fprintf(fptr, "AccountNumber:%lld\n", newmember->accountnumber);
+
+    printf("Enter Your Phone Number: ");
+    scanf("%lld", &newmember->phonenumber);
+    fprintf(fptr, "PhoneNumber:%lld\n", newmember->phonenumber);
+
+    printf("Enter Username: ");
+    scanf("%s", newmember->username);
+    fprintf(fptr, "Username:%s\n", newmember->username);
+
+    printf("Enter Password: ");
+    scanf("%s", newmember->password);
+
+    newmember->balance = 0.0;
+
+    printf("\nName:%s\nDOB:%d/%d/%d\nGender:%s\nAccountNumber:%lld\nPhoneNumber:%lld\nUserName:%s",
+           newmember->name, newmember->day, newmember->month, newmember->year, newmember->gender,
+           newmember->accountnumber, newmember->phonenumber, newmember->username);
+
+    members[count++] = newmember;
+
+    printf("\n----Member Registered Successfully!----\n");
+}
+
+int login() {
+    char uname[30], pass[30];
+    printf("Username: ");
+    scanf("%s", uname);
+    printf("Password: ");
+    scanf("%s", pass);
+
+    for (int i = 0; i < count; i++) {
+        if (strcmp(members[i]->username, uname) == 0 && strcmp(members[i]->password, pass) == 0) {
+            printf("Login Successful!\n");
+            return i;
+        }
+    }
+    printf("Invalid Details\n");
+    return -1;
+}
+
+void viewInfo(struct member *m) {
+    printf("\n--- Member Info ---\n");
+    fprintf(fptr, "\n--- Member Info ---\n");
+
+    printf("Name: %s\n", m->name);
+    fprintf(fptr, "Name:%s\n", m->name);
+
+    printf("DOB: %d/%d/%d\n", m->day, m->month, m->year);
+    fprintf(fptr, "DOB: %d/%d/%d\n", m->day, m->month, m->year);
+
+    printf("Gender: %s\n", m->gender);
+    fprintf(fptr, "Gender:%s\n", m->gender);
+
+    printf("AccountNumber: %lld\n", m->accountnumber);
+    fprintf(fptr, "AccountNumber:%lld\n", m->accountnumber);
+
+    printf("PhoneNumber: %lld\n", m->phonenumber);
+    fprintf(fptr, "PhoneNumber:%lld\n", m->phonenumber);
+
+    printf("Username: %s\n", m->username);
+    fprintf(fptr, "Username:%s\n", m->username);
+
+    printf("Balance: %.2f\n", m->balance);
+    fprintf(fptr, "Balance: %.2f\n", m->balance);
+}
+
+void deposit(struct member *m) {
+    float amt;
+    printf("Enter amount to deposit: ");
+    scanf("%f", &amt);
+    m->balance += amt;
+    printf("Balance after deposit: %.2f\n", m->balance);
+    fprintf(fptr, "Balance after deposit: %.2f\n", m->balance);
+}
+
+void withdraw(struct member *m) {
+    float amt;
+    printf("Enter amount to withdraw: ");
+    scanf("%f", &amt);
+    if (amt > m->balance) {
+        printf("Insufficient balance!\n");
+        fprintf(fptr, "Insufficient balance!\n");
+    } else {
+        m->balance -= amt;
+        printf("Balance after withdrawal: %.2f\n", m->balance);
+        fprintf(fptr, "Balance after withdrawal: %.2f\n", m->balance);
+    }
+}
+
+void menu(struct member *m) {
+    int choice;
+    do {
+        printf("\n1. View Info\n2. Deposit\n3. Withdraw\n4. Logout\nChoose: ");
+        scanf("%d", &choice);
+        switch (choice) {
+            case 1: viewInfo(m); break;
+            case 2: deposit(m); break;
+            case 3: withdraw(m); break;
+            case 4: printf("Logged out.\n"); break;
+            default: printf("Invalid Option\n");
+        }
+    } while (choice != 4);
+}
+
+int main() {
+    fptr = fopen("prjct.txt", "a");
+    if (!fptr) {
+        printf("Error opening file!\n");
+        return 1;
+    }
+
+    int choice, index, opt, reciept;
+
+    do {
+        printf("\nBANK APPLICATION\n");
+        printf("1. Register\n2. Login\n3. Exit\nChoose: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: registration(); break;
+            case 2:
+                index = login();
+                if (index != -1) {
+                    menu(members[index]);
+                }
+                break;
+            case 3: printf("Exiting Application\n"); break;
+            default: printf("Invalid Choice\n");
+        }
+    } while (choice != 3);
+
+    fclose(fptr);
+
+    printf("\n-------Do You Want The Receipt-------\n");
+    printf("ENTER 1 FOR YES\nENTER 0 FOR NO\nCHOOSE YES OR NO: ");
+    scanf("%d", &opt);
+
+    if (opt == 1) {
+        fptr = fopen("prjct.txt", "r");
+        if (!fptr) {
+            printf("Error opening file!\n");
+            return 1;
+        }
+        reciept = fgetc(fptr);
+        while (reciept != EOF) {
+            printf("%c", reciept);
+            reciept = fgetc(fptr);
+        }
+        fclose(fptr);
+    } else {
+        printf("---Thanks Transaction Is Closed---");
+    }
+
+    for (int i = 0; i < count; i++) {
+        free(members[i]);
+    }
+return 0;
+}
 
