@@ -3,7 +3,6 @@
 #include<string.h>
 
 FILE *fptr;
-
 struct member {
     char name[50];
     int day;
